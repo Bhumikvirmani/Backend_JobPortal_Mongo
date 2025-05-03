@@ -18,10 +18,15 @@ app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
 const corsOptions = {
     origin: ['http://localhost:5173', 'https://elevatehire.netlify.app'],
-    credentials:true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }
 
 app.use(cors(corsOptions));
+
+// Add a pre-flight OPTIONS handler for all routes
+app.options('*', cors(corsOptions));
 
 const PORT = process.env.PORT || 3000;
 

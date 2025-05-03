@@ -92,6 +92,18 @@ export const login = async (req, res) => {
             profile: user.profile
         }
 
+        // Log cookie settings for debugging
+        console.log("Setting cookie with token:", {
+            token: token.substring(0, 10) + "...",
+            cookieOptions: {
+                maxAge: 1 * 24 * 60 * 60 * 1000,
+                httpOnly: true,
+                sameSite: 'none',
+                secure: true,
+                path: '/'
+            }
+        });
+
         return res.status(200).cookie("token", token, {
             maxAge: 1 * 24 * 60 * 60 * 1000,
             httpOnly: true,
@@ -101,6 +113,7 @@ export const login = async (req, res) => {
         }).json({
             message: `Welcome back ${user.fullname}`,
             user,
+            token, // Include token in response body for frontend storage
             success: true
         })
     } catch (error) {

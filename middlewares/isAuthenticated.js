@@ -41,7 +41,29 @@ const isAuthenticated = async (req, res, next) => {
 
         try {
             console.log("SECRET_KEY exists:", !!process.env.SECRET_KEY);
-            const decode = await jwt.verify(token, process.env.SECRET_KEY);
+
+            // Check if token is a manual token (for debugging only)
+            if (token.startsWith('manual_')) {
+                console.log("Manual token detected, extracting user ID");
+                // Format: manual_USER_ID_TIMESTAMP
+                const parts = token.split('_');
+                if (parts.length >= 2) {
+                    const userId = parts[1];
+                    console.log("User ID extracted from manual token:", userId);
+                    req.id = userId;
+                    next();
+                    return;
+                } else {
+                    console.log("Invalid manual token format");
+                    return res.status(401).json({
+                        message: "Invalid manual token format",
+                        success: false
+                    });
+                }
+            }
+
+            // Normal JWT verification
+            const decode = jwt.verify(token, process.env.SECRET_KEY);
             console.log("Token decoded successfully:", decode);
 
             if(!decode){

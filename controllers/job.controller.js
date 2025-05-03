@@ -60,22 +60,37 @@ export const getAllJobs = async (req, res) => {
         console.log(error);
     }
 }
-// student
+// Public endpoint for job details - works for both authenticated and non-authenticated users
 export const getJobById = async (req, res) => {
     try {
         const jobId = req.params.id;
+
+        // Populate company information for all users
         const job = await Job.findById(jobId).populate({
-            path:"applications"
+            path: "company"
         });
+
         if (!job) {
             return res.status(404).json({
-                message: "Jobs not found.",
+                message: "Job not found.",
                 success: false
-            })
-        };
+            });
+        }
+
+        // If user is authenticated, also populate applications
+        if (req.id) {
+            await job.populate({
+                path: "applications"
+            });
+        }
+
         return res.status(200).json({ job, success: true });
     } catch (error) {
         console.log(error);
+        return res.status(500).json({
+            message: "Server error while fetching job details",
+            success: false
+        });
     }
 }
 // admin kitne job create kra hai abhi tk

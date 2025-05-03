@@ -5,9 +5,9 @@ import { getAdminJobs, getAllJobs, getJobById, postJob } from "../controllers/jo
 const router = express.Router();
 
 router.route("/post").post(isAuthenticated, postJob);
-router.route("/get").get(getAllJobs); // Removed authentication for public job listings
+router.route("/get").get(getAllJobs); // Public endpoint for job listings
 router.route("/getadminjobs").get(isAuthenticated, getAdminJobs);
-router.route("/get/:id").get(isAuthenticated, getJobById);
+router.route("/get/:id").get(getJobById); // Made public for job details page
 
 export default router;
 

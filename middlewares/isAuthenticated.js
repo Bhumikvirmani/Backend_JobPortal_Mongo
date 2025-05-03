@@ -2,37 +2,58 @@ import jwt from "jsonwebtoken";
 
 const isAuthenticated = async (req, res, next) => {
     try {
-        console.log("Request headers:", req.headers);
+        console.log("Request URL:", req.originalUrl);
+        console.log("Request method:", req.method);
+        console.log("Request headers:", JSON.stringify(req.headers, null, 2));
         console.log("Cookies received:", req.cookies);
+        console.log("Query params:", req.query);
 
         // First try to get token from cookies
         let token = req.cookies.token;
+        let tokenSource = "cookie";
 
         // If no token in cookies, check Authorization header
         if (!token && req.headers.authorization) {
             const authHeader = req.headers.authorization;
             if (authHeader.startsWith('Bearer ')) {
                 token = authHeader.substring(7);
-                console.log("Using token from Authorization header");
+                tokenSource = "authorization header";
+                console.log("Using token from Authorization header:", token.substring(0, 10) + "...");
             }
         }
 
+        // If still no token, check query parameter (not recommended for production, but useful for debugging)
+        if (!token && req.query.token) {
+            token = req.query.token;
+            tokenSource = "query parameter";
+            console.log("Using token from query parameter:", token.substring(0, 10) + "...");
+        }
+
         if (!token) {
+            console.log("No token found in any location");
             return res.status(401).json({
-                message: "User not authenticated - No token found in cookies or Authorization header",
+                message: "User not authenticated - No token found in cookies, headers, or query parameters",
                 success: false,
             });
         }
 
+        console.log(`Token found in ${tokenSource}. Length: ${token.length}`);
+
         try {
+            console.log("SECRET_KEY exists:", !!process.env.SECRET_KEY);
             const decode = await jwt.verify(token, process.env.SECRET_KEY);
+            console.log("Token decoded successfully:", decode);
+
             if(!decode){
+                console.log("Decode is falsy even though verification didn't throw");
                 return res.status(401).json({
                     message:"Invalid token",
                     success:false
                 });
             }
+
             req.id = decode.userId;
+            console.log("User ID extracted from token:", req.id);
             next();
         } catch (jwtError) {
             console.log("JWT verification error:", jwtError);

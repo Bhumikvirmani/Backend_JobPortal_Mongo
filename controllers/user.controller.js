@@ -194,3 +194,56 @@ export const updateProfile = async (req, res) => {
         console.log(error);
     }
 }
+
+// Special function to generate a token for a user without authentication
+export const generateToken = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        if (!userId) {
+            return res.status(400).json({
+                message: "User ID is required",
+                success: false
+            });
+        }
+
+        // Check if user exists
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+                success: false
+            });
+        }
+
+        // Generate token
+        const tokenData = {
+            userId: user._id
+        };
+
+        const token = jwt.sign(tokenData, process.env.SECRET_KEY, { expiresIn: '1d' });
+
+        console.log(`Generated token for user ${userId}`);
+
+        // Return token in both cookie and response body
+        return res.status(200)
+            .cookie("token", token, {
+                maxAge: 1 * 24 * 60 * 60 * 1000,
+                httpOnly: true,
+                sameSite: 'none',
+                secure: true,
+                path: '/'
+            })
+            .json({
+                message: "Token generated successfully",
+                token,
+                success: true
+            });
+    } catch (error) {
+        console.log("Error generating token:", error);
+        return res.status(500).json({
+            message: "Server error while generating token",
+            success: false
+        });
+    }
+}

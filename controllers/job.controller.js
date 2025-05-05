@@ -164,9 +164,11 @@ export const getAdminJobs = async (req, res) => {
 
         if (!jobs || jobs.length === 0) {
             console.log("No jobs found for this admin");
-            return res.status(404).json({
-                message: "Jobs not found.",
-                success: false
+            // Return 200 with empty array instead of 404
+            return res.status(200).json({
+                message: "No jobs found for this admin.",
+                jobs: [],
+                success: true
             });
         }
 

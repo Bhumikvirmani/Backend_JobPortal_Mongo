@@ -4,6 +4,14 @@ import { getAdminJobs, getAllJobs, getJobById, postJob } from "../controllers/jo
 
 const router = express.Router();
 
+// Add a test endpoint to check if the API is working
+router.route("/test").get((req, res) => {
+    return res.status(200).json({
+        message: "Job API is working correctly",
+        success: true
+    });
+});
+
 router.route("/post").post(isAuthenticated, postJob);
 router.route("/get").get(getAllJobs); // Public endpoint for job listings
 router.route("/getadminjobs").get(isAuthenticated, getAdminJobs);

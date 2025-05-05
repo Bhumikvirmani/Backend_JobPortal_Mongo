@@ -35,6 +35,20 @@ export const postJob = async (req, res) => {
         });
 
         try {
+            // Log the data types for debugging
+            console.log("Data types:", {
+                title: typeof title,
+                description: typeof description,
+                requirements: typeof requirements,
+                salary: typeof salary,
+                location: typeof location,
+                jobType: typeof jobType,
+                experience: typeof experience,
+                position: typeof position,
+                companyId: typeof companyId,
+                userId: typeof userId
+            });
+
             const job = await Job.create({
                 title,
                 description,
@@ -42,8 +56,8 @@ export const postJob = async (req, res) => {
                 salary: Number(salary),
                 location,
                 jobType,
-                experienceLevel: experience,
-                position,
+                experienceLevel: String(experience), // Ensure it's a string
+                position: Number(position), // Ensure it's a number
                 company: companyId,
                 created_by: userId
             });
